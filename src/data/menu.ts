@@ -26,7 +26,7 @@ export const menu: SushiMenu[] = [
   },
 
   {
-    name: "タマゴ",
+    name: "卵",
     ingredients: [
       { name: "シャリ", weight: 15 },
       { name: "タマゴ", weight: 20 },

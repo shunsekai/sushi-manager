@@ -1,11 +1,28 @@
 import { menu, SushiMenu } from "./data/menu.ts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { inventory } from "./data/inventory.ts";
+import { supabase } from "./lib/supabase.ts";
 
 export default function App() {
   const [sales, setSales] = useState<Record<string, number>>({});
   const [safetyMargin, setSafetyMargin] = useState(10);
   const [stock, setStock] = useState(inventory);
+  const [menus, setMenus] = useState<SushiMenu[]>([]);
+
+  useEffect(() => {
+    const fetchMenus = async () => {
+      const { data, error } = await supabase.from("menus").select("*");
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      console.log(data);
+    };
+
+    fetchMenus();
+  }, []);
 
   const handleSalesChange = (menuName: string, count: number) => {
     setSales((currentSales) => ({

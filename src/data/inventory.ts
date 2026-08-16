@@ -15,4 +15,5 @@ export const inventory = [
     name: "卵",
     weight: 1000,
   },
+  { name: "ネギ", weight: 100 },
 ];
