@@ -2,23 +2,47 @@ import { menu, SushiMenu } from "./data/menu.ts";
 import { useState, useEffect } from "react";
 import { inventory } from "./data/inventory.ts";
 import { supabase } from "./lib/supabase.ts";
+type Ingredient = {
+  id: number;
+  name: string;
+};
 
+type Menu = {
+  id: number;
+  name: string;
+  ingredients: Ingredient[];
+};
 export default function App() {
   const [sales, setSales] = useState<Record<string, number>>({});
   const [safetyMargin, setSafetyMargin] = useState(10);
   const [stock, setStock] = useState(inventory);
-  const [menus, setMenus] = useState<SushiMenu[]>([]);
+  const [menus, setMenus] = useState<Menu[]>([]);
 
   useEffect(() => {
     const fetchMenus = async () => {
-      const { data, error } = await supabase.from("menus").select("*");
+      const { data, error } = await supabase.from("menus").select(`
+    id,
+    name,
+    menu_ingredients (
+      ingredients (
+        id,
+        name
+      )
+    )
+  `);
 
       if (error) {
         console.error(error);
         return;
       }
-
       console.log(data);
+      const menusWithIngredients = data.map((menu) => ({
+        id: menu.id,
+        name: menu.name,
+        ingredients: menu.menu_ingredients.flatMap((item) => item.ingredients),
+      }));
+
+      setMenus(menusWithIngredients);
     };
 
     fetchMenus();
@@ -31,7 +55,7 @@ export default function App() {
     }));
   };
 
-  const handlePreparation = (item: SushiMenu) => {
+  const handlePreparation = (item: Menu) => {
     const salesCount = sales[item.name] ?? 0;
 
     const preparationCount = Math.ceil(salesCount * (1 + safetyMargin / 100));
@@ -60,8 +84,8 @@ export default function App() {
 
       <h2>今日の売上</h2>
 
-      {menu.map((item) => (
-        <div key={item.name}>
+      {menus.map((item) => (
+        <div key={item.id}>
           <label>
             {item.name}：
             <input
@@ -89,7 +113,7 @@ export default function App() {
 
       <h2>仕込み</h2>
 
-      {menu.map((item) => {
+      {menus.map((item) => {
         const salesCount = sales[item.name] ?? 0;
 
         const preparationCount = Math.ceil(
