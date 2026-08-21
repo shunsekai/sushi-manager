@@ -5,6 +5,7 @@ import { supabase } from "./lib/supabase.ts";
 type Ingredient = {
   id: number;
   name: string;
+  weight: number;
 };
 
 type Menu = {
@@ -23,7 +24,7 @@ export default function App() {
       const { data, error } = await supabase.from("menus").select(`
     id,
     name,
-    menu_ingredients (
+    menu_ingredients (weight,
       ingredients (
         id,
         name
@@ -38,8 +39,20 @@ export default function App() {
       console.log(data);
       const menusWithIngredients = data.map((menu) => ({
         id: menu.id,
-        name: menu.name,
-        ingredients: menu.menu_ingredients.flatMap((item) => item.ingredients),
+        name: menu.name ?? "",
+        ingredients: menu.menu_ingredients
+          .map((item) => {
+            if (!item.ingredients) {
+              return null;
+            }
+
+            return {
+              id: item.ingredients.id,
+              name: item.ingredients.name ?? "",
+              weight: item.weight ?? 0,
+            };
+          })
+          .filter((ingredient) => ingredient !== null),
       }));
 
       setMenus(menusWithIngredients);
@@ -121,14 +134,14 @@ export default function App() {
         );
 
         return (
-          <div key={item.name}>
+          <div key={item.id}>
             <h3>{item.name}</h3>
 
             <p>仕込み数：{preparationCount}皿</p>
             <button onClick={() => handlePreparation(item)}>仕込みする</button>
 
             {item.ingredients.map((ingredient) => (
-              <p key={ingredient.name}>
+              <p key={ingredient.id}>
                 {ingredient.name}：{ingredient.weight * preparationCount}g
               </p>
             ))}
