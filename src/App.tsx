@@ -13,11 +13,18 @@ type Menu = {
   name: string;
   ingredients: Ingredient[];
 };
+
+type Stock = {
+  id: number;
+  ingredient_id: number;
+  name: string;
+  weight: number;
+};
 export default function App() {
-  const [sales, setSales] = useState<Record<string, number>>({});
+  const [sales, setSales] = useState<Record<number, number>>({});
   const [safetyMargin, setSafetyMargin] = useState(10);
-  const [stock, setStock] = useState(inventory);
   const [menus, setMenus] = useState<Menu[]>([]);
+  const [stock, setStock] = useState<Stock[]>([]);
 
   useEffect(() => {
     const fetchMenus = async () => {
@@ -61,22 +68,60 @@ export default function App() {
     fetchMenus();
   }, []);
 
-  const handleSalesChange = (menuName: string, count: number) => {
+  useEffect(() => {
+    const fetchInventory = async () => {
+      const { data, error } = await supabase.from("inventory").select(`
+        id,
+        ingredient_id,
+        weight,
+        ingredients (
+          id,
+          name
+        )
+      `);
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const inventoryData = data
+        .map((item) => {
+          if (!item.ingredient_id || !item.ingredients) {
+            return null;
+          }
+
+          return {
+            id: item.id,
+            ingredient_id: item.ingredient_id,
+            name: item.ingredients.name ?? "",
+            weight: item.weight ?? 0,
+          };
+        })
+        .filter((item) => item !== null);
+
+      setStock(inventoryData);
+    };
+
+    fetchInventory();
+  }, []);
+
+  const handleSalesChange = (menuId: number, count: number) => {
     setSales((currentSales) => ({
       ...currentSales,
-      [menuName]: count,
+      [menuId]: count,
     }));
   };
 
   const handlePreparation = (item: Menu) => {
-    const salesCount = sales[item.name] ?? 0;
+    const salesCount = sales[item.id] ?? 0;
 
     const preparationCount = Math.ceil(salesCount * (1 + safetyMargin / 100));
 
     setStock((currentStock) =>
       currentStock.map((stockItem) => {
         const ingredient = item.ingredients.find(
-          (ingredient) => ingredient.name === stockItem.name,
+          (ingredient) => ingredient.id === stockItem.id,
         );
 
         if (!ingredient) {
@@ -103,9 +148,9 @@ export default function App() {
             {item.name}：
             <input
               type="number"
-              value={sales[item.name] ?? 0}
+              value={sales[item.id] ?? 0}
               onChange={(e) =>
-                handleSalesChange(item.name, Number(e.target.value))
+                handleSalesChange(item.id, Number(e.target.value))
               }
             />
             皿
@@ -127,7 +172,7 @@ export default function App() {
       <h2>仕込み</h2>
 
       {menus.map((item) => {
-        const salesCount = sales[item.name] ?? 0;
+        const salesCount = sales[item.id] ?? 0;
 
         const preparationCount = Math.ceil(
           salesCount * (1 + safetyMargin / 100),
