@@ -1,6 +1,6 @@
-import { menu, SushiMenu } from "./data/menu.ts";
+/*import { menu, SushiMenu } from "./data/menu.ts";*/
 import { useState, useEffect } from "react";
-import { inventory } from "./data/inventory.ts";
+/*import { inventory } from "./data/inventory.ts";*/
 import { supabase } from "./lib/supabase.ts";
 type Ingredient = {
   id: number;
@@ -113,15 +113,39 @@ export default function App() {
     }));
   };
 
-  const handlePreparation = (item: Menu) => {
+  const handlePreparation = async (item: Menu) => {
     const salesCount = sales[item.id] ?? 0;
 
     const preparationCount = Math.ceil(salesCount * (1 + safetyMargin / 100));
 
+    for (const ingredient of item.ingredients) {
+      const stockItem = stock.find(
+        (stockItem) => stockItem.ingredient_id === ingredient.id,
+      );
+
+      if (!stockItem) {
+        continue;
+      }
+
+      const newWeight = stockItem.weight - ingredient.weight * preparationCount;
+
+      const { error } = await supabase
+        .from("inventory")
+        .update({
+          weight: newWeight,
+        })
+        .eq("id", stockItem.id);
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+    }
+
     setStock((currentStock) =>
       currentStock.map((stockItem) => {
         const ingredient = item.ingredients.find(
-          (ingredient) => ingredient.id === stockItem.id,
+          (ingredient) => ingredient.id === stockItem.ingredient_id,
         );
 
         if (!ingredient) {
