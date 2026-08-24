@@ -220,9 +220,27 @@ export default function App() {
 
       <h2>在庫</h2>
       {stock.map((stockItem) => (
-        <p key={stockItem.name}>
-          {stockItem.name}:{stockItem.weight}g
-        </p>
+        <div key={stockItem.id}>
+          <label>
+            {stockItem.name}：
+            <input
+              type="number"
+              value={stockItem.weight}
+              onChange={(e) => {
+                const weight = Number(e.target.value);
+
+                setStock((currentStock) =>
+                  currentStock.map((item) =>
+                    item.id === stockItem.id ? { ...item, weight } : item,
+                  ),
+                );
+              }}
+            />
+            g
+          </label>
+
+          <button onClick={() => handleStockUpdate(stockItem)}>更新</button>
+        </div>
       ))}
     </>
   );
