@@ -28,7 +28,10 @@ export default function App() {
 
   useEffect(() => {
     const fetchMenus = async () => {
-      const { data, error } = await supabase.from("menus").select(`
+      const { data, error } = await supabase
+        .from("menus")
+        .select(
+          `
     id,
     name,
     menu_ingredients (weight,
@@ -37,8 +40,9 @@ export default function App() {
         name
       )
     )
-  `);
-
+  `,
+        )
+        .order("id", { ascending: true });
       if (error) {
         console.error(error);
         return;
@@ -70,7 +74,10 @@ export default function App() {
 
   useEffect(() => {
     const fetchInventory = async () => {
-      const { data, error } = await supabase.from("inventory").select(`
+      const { data, error } = await supabase
+        .from("inventory")
+        .select(
+          `
         id,
         ingredient_id,
         weight,
@@ -78,7 +85,9 @@ export default function App() {
           id,
           name
         )
-      `);
+      `,
+        )
+        .order("id", { ascending: true });
 
       if (error) {
         console.error(error);
@@ -160,6 +169,19 @@ export default function App() {
     );
   };
 
+  const handleStockUpdate = async (stockItem: Stock) => {
+    const { error } = await supabase
+      .from("inventory")
+      .update({
+        weight: stockItem.weight,
+      })
+      .eq("id", stockItem.id);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+  };
   return (
     <>
       <h1>Sushi Manager</h1>
