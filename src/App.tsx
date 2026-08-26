@@ -127,16 +127,38 @@ export default function App() {
 
     const preparationCount = Math.ceil(salesCount * (1 + safetyMargin / 100));
 
+    // ① 全材料の在庫をチェック
     for (const ingredient of item.ingredients) {
       const stockItem = stock.find(
         (stockItem) => stockItem.ingredient_id === ingredient.id,
       );
 
       if (!stockItem) {
-        continue;
+        console.log(`${ingredient.name}の在庫がありません`);
+        return;
       }
 
-      const newWeight = stockItem.weight - ingredient.weight * preparationCount;
+      const requiredWeight = ingredient.weight * preparationCount;
+
+      if (stockItem.weight < requiredWeight) {
+        console.log(`${stockItem.name}の在庫が足りません`);
+        return;
+      }
+    }
+
+    // ② 全材料が足りていたらDBを更新
+    for (const ingredient of item.ingredients) {
+      const stockItem = stock.find(
+        (stockItem) => stockItem.ingredient_id === ingredient.id,
+      );
+
+      if (!stockItem) {
+        return;
+      }
+
+      const requiredWeight = ingredient.weight * preparationCount;
+
+      const newWeight = stockItem.weight - requiredWeight;
 
       const { error } = await supabase
         .from("inventory")
@@ -150,23 +172,6 @@ export default function App() {
         return;
       }
     }
-
-    setStock((currentStock) =>
-      currentStock.map((stockItem) => {
-        const ingredient = item.ingredients.find(
-          (ingredient) => ingredient.id === stockItem.ingredient_id,
-        );
-
-        if (!ingredient) {
-          return stockItem;
-        }
-
-        return {
-          ...stockItem,
-          weight: stockItem.weight - ingredient.weight * preparationCount,
-        };
-      }),
-    );
   };
 
   const handleStockUpdate = async (stockItem: Stock) => {
