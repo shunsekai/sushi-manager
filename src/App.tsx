@@ -127,7 +127,6 @@ export default function App() {
 
     const preparationCount = Math.ceil(salesCount * (1 + safetyMargin / 100));
 
-    // ① 全材料の在庫をチェック
     for (const ingredient of item.ingredients) {
       const stockItem = stock.find(
         (stockItem) => stockItem.ingredient_id === ingredient.id,
@@ -146,7 +145,6 @@ export default function App() {
       }
     }
 
-    // ② 全材料が足りていたらDBを更新
     for (const ingredient of item.ingredients) {
       const stockItem = stock.find(
         (stockItem) => stockItem.ingredient_id === ingredient.id,
@@ -172,6 +170,25 @@ export default function App() {
         return;
       }
     }
+
+    setStock((currentStock) =>
+      currentStock.map((stockItem) => {
+        const ingredient = item.ingredients.find(
+          (ingredient) => ingredient.id === stockItem.ingredient_id,
+        );
+
+        if (!ingredient) {
+          return stockItem;
+        }
+
+        const requiredWeight = ingredient.weight * preparationCount;
+
+        return {
+          ...stockItem,
+          weight: stockItem.weight - requiredWeight,
+        };
+      }),
+    );
   };
 
   const handleStockUpdate = async (stockItem: Stock) => {
