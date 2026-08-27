@@ -28,6 +28,9 @@ export default function App() {
   const [preparationMessage, setPreparationMessage] = useState<
     Record<number, string>
   >({});
+  const [preparedMenus, setPreparedMenus] = useState<Record<number, boolean>>(
+    {},
+  );
 
   useEffect(() => {
     const fetchMenus = async () => {
@@ -130,6 +133,13 @@ export default function App() {
 
     const preparationCount = Math.ceil(salesCount * (1 + safetyMargin / 100));
 
+    if (preparationCount <= 0) {
+      setPreparationMessage((current) => ({
+        ...current,
+        [item.id]: "仕込み数が0皿です",
+      }));
+      return;
+    }
     // ① 全材料の在庫をチェック
     for (const ingredient of item.ingredients) {
       const stockItem = stock.find(
@@ -213,6 +223,11 @@ export default function App() {
       ...current,
       [item.id]: "仕込みが完了しました",
     }));
+
+    setPreparedMenus((current) => ({
+      ...current,
+      [item.id]: true,
+    }));
   };
 
   const handleStockUpdate = async (stockItem: Stock) => {
@@ -275,8 +290,12 @@ export default function App() {
             <h3>{item.name}</h3>
 
             <p>仕込み数：{preparationCount}皿</p>
-            <button onClick={() => handlePreparation(item)}>仕込みする</button>
-
+            <button
+              onClick={() => handlePreparation(item)}
+              disabled={preparedMenus[item.id]}
+            >
+              {preparedMenus[item.id] ? "仕込み済み" : "仕込みする"}
+            </button>
             {preparationMessage[item.id] && (
               <p>{preparationMessage[item.id]}</p>
             )}
