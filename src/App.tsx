@@ -25,6 +25,9 @@ export default function App() {
   const [safetyMargin, setSafetyMargin] = useState(10);
   const [menus, setMenus] = useState<Menu[]>([]);
   const [stock, setStock] = useState<Stock[]>([]);
+  const [preparationMessage, setPreparationMessage] = useState<
+    Record<number, string>
+  >({});
 
   useEffect(() => {
     const fetchMenus = async () => {
@@ -127,24 +130,32 @@ export default function App() {
 
     const preparationCount = Math.ceil(salesCount * (1 + safetyMargin / 100));
 
+    // ① 全材料の在庫をチェック
     for (const ingredient of item.ingredients) {
       const stockItem = stock.find(
         (stockItem) => stockItem.ingredient_id === ingredient.id,
       );
 
       if (!stockItem) {
-        console.log(`${ingredient.name}の在庫がありません`);
+        setPreparationMessage((current) => ({
+          ...current,
+          [item.id]: `${ingredient.name}の在庫がありません`,
+        }));
         return;
       }
 
       const requiredWeight = ingredient.weight * preparationCount;
 
       if (stockItem.weight < requiredWeight) {
-        console.log(`${stockItem.name}の在庫が足りません`);
+        setPreparationMessage((current) => ({
+          ...current,
+          [item.id]: `${stockItem.name}の在庫が足りません`,
+        }));
         return;
       }
     }
 
+    // ② 全材料が足りていたらDBを更新
     for (const ingredient of item.ingredients) {
       const stockItem = stock.find(
         (stockItem) => stockItem.ingredient_id === ingredient.id,
@@ -167,10 +178,17 @@ export default function App() {
 
       if (error) {
         console.error(error);
+
+        setPreparationMessage((current) => ({
+          ...current,
+          [item.id]: "在庫の更新に失敗しました",
+        }));
+
         return;
       }
     }
 
+    // ③ ブラウザ側の在庫も更新
     setStock((currentStock) =>
       currentStock.map((stockItem) => {
         const ingredient = item.ingredients.find(
@@ -189,6 +207,12 @@ export default function App() {
         };
       }),
     );
+
+    // ④ 成功メッセージ
+    setPreparationMessage((current) => ({
+      ...current,
+      [item.id]: "仕込みが完了しました",
+    }));
   };
 
   const handleStockUpdate = async (stockItem: Stock) => {
@@ -253,6 +277,9 @@ export default function App() {
             <p>仕込み数：{preparationCount}皿</p>
             <button onClick={() => handlePreparation(item)}>仕込みする</button>
 
+            {preparationMessage[item.id] && (
+              <p>{preparationMessage[item.id]}</p>
+            )}
             {item.ingredients.map((ingredient) => (
               <p key={ingredient.id}>
                 {ingredient.name}：{ingredient.weight * preparationCount}g
