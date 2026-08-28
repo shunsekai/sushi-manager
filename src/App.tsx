@@ -32,6 +32,10 @@ export default function App() {
     {},
   );
 
+  const [originalStock, setOriginalStock] = useState<Record<number, number>>(
+    {},
+  );
+
   useEffect(() => {
     const fetchMenus = async () => {
       const { data, error } = await supabase
@@ -231,6 +235,8 @@ export default function App() {
   };
 
   const handleStockUpdate = async (stockItem: Stock) => {
+    const oldWeight = originalStock[stockItem.id];
+
     const { error } = await supabase
       .from("inventory")
       .update({
@@ -240,8 +246,23 @@ export default function App() {
 
     if (error) {
       console.error(error);
+
+      if (oldWeight !== undefined) {
+        setStock((currentStock) =>
+          currentStock.map((item) =>
+            item.id === stockItem.id ? { ...item, weight: oldWeight } : item,
+          ),
+        );
+      }
+
       return;
     }
+
+    setOriginalStock((current) => {
+      const newOriginalStock = { ...current };
+      delete newOriginalStock[stockItem.id];
+      return newOriginalStock;
+    });
   };
   return (
     <>
@@ -318,6 +339,17 @@ export default function App() {
               value={stockItem.weight}
               onChange={(e) => {
                 const weight = Number(e.target.value);
+
+                setOriginalStock((current) => {
+                  if (current[stockItem.id] === undefined) {
+                    return {
+                      ...current,
+                      [stockItem.id]: stockItem.weight,
+                    };
+                  }
+
+                  return current;
+                });
 
                 setStock((currentStock) =>
                   currentStock.map((item) =>
