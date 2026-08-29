@@ -36,6 +36,8 @@ export default function App() {
     {},
   );
 
+  const [inventoryError, setInventoryError] = useState("");
+
   useEffect(() => {
     const fetchMenus = async () => {
       const { data, error } = await supabase
@@ -101,6 +103,7 @@ export default function App() {
 
       if (error) {
         console.error(error);
+        setInventoryError("在庫の取得に失敗しました");
         return;
       }
 
@@ -330,6 +333,7 @@ export default function App() {
       })}
 
       <h2>在庫</h2>
+      {inventoryError && <p>{inventoryError}</p>}
       {stock.map((stockItem) => (
         <div key={stockItem.id}>
           <label>
