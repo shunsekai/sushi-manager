@@ -37,6 +37,7 @@ export default function App() {
   );
 
   const [inventoryError, setInventoryError] = useState("");
+  const [stockMessage, setStockMessage] = useState<Record<number, string>>({});
 
   useEffect(() => {
     const fetchMenus = async () => {
@@ -257,6 +258,10 @@ export default function App() {
           ),
         );
       }
+      setStockMessage((current) => ({
+        ...current,
+        [stockItem.id]: "在庫の更新に失敗しました。元の値に戻しました。",
+      }));
 
       return;
     }
@@ -366,6 +371,7 @@ export default function App() {
           </label>
 
           <button onClick={() => handleStockUpdate(stockItem)}>更新</button>
+          {stockMessage[stockItem.id] && <p>{stockMessage[stockItem.id]}</p>}
         </div>
       ))}
     </>
