@@ -1,20 +1,23 @@
-/*import { menu, SushiMenu } from "./data/menu.ts";*/
 import { useState, useEffect } from "react";
-/*import { inventory } from "./data/inventory.ts";*/
 import { supabase } from "./lib/supabase.ts";
-type Ingredient = {
+import "./App.css";
+import HomePage from "./pages/HomePage";
+import InventoryPage from "./pages/InventoryPage";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+
+export type Ingredient = {
   id: number;
   name: string;
   weight: number;
 };
 
-type Menu = {
+export type Menu = {
   id: number;
   name: string;
   ingredients: Ingredient[];
 };
 
-type Stock = {
+export type Stock = {
   id: number;
   ingredient_id: number;
   name: string;
@@ -271,109 +274,54 @@ export default function App() {
       delete newOriginalStock[stockItem.id];
       return newOriginalStock;
     });
+
+    setStockMessage((current) => {
+      const newMessages = { ...current };
+      delete newMessages[stockItem.id];
+      return newMessages;
+    });
   };
   return (
-    <>
-      <h1>Sushi Manager</h1>
+    <BrowserRouter>
+      <header>
+        <h1>Sushi Manager</h1>
 
-      <h2>今日の売上</h2>
-
-      {menus.map((item) => (
-        <div key={item.id}>
-          <label>
-            {item.name}：
-            <input
-              type="number"
-              value={sales[item.id] ?? 0}
-              onChange={(e) =>
-                handleSalesChange(item.id, Number(e.target.value))
-              }
+        <nav>
+          <Link to="/">ホーム</Link>
+          <Link to="/inventory">在庫管理</Link>
+        </nav>
+      </header>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <HomePage
+              menus={menus}
+              sales={sales}
+              safetyMargin={safetyMargin}
+              preparedMenus={preparedMenus}
+              preparationMessage={preparationMessage}
+              handleSalesChange={handleSalesChange}
+              setSafetyMargin={setSafetyMargin}
+              handlePreparation={handlePreparation}
             />
-            皿
-          </label>
-        </div>
-      ))}
-
-      <h2>安全余裕</h2>
-
-      <label>
-        <input
-          type="number"
-          value={safetyMargin}
-          onChange={(e) => setSafetyMargin(Number(e.target.value))}
+          }
         />
-        %
-      </label>
 
-      <h2>仕込み</h2>
-
-      {menus.map((item) => {
-        const salesCount = sales[item.id] ?? 0;
-
-        const preparationCount = Math.ceil(
-          salesCount * (1 + safetyMargin / 100),
-        );
-
-        return (
-          <div key={item.id}>
-            <h3>{item.name}</h3>
-
-            <p>仕込み数：{preparationCount}皿</p>
-            <button
-              onClick={() => handlePreparation(item)}
-              disabled={preparedMenus[item.id]}
-            >
-              {preparedMenus[item.id] ? "仕込み済み" : "仕込みする"}
-            </button>
-            {preparationMessage[item.id] && (
-              <p>{preparationMessage[item.id]}</p>
-            )}
-            {item.ingredients.map((ingredient) => (
-              <p key={ingredient.id}>
-                {ingredient.name}：{ingredient.weight * preparationCount}g
-              </p>
-            ))}
-          </div>
-        );
-      })}
-
-      <h2>在庫</h2>
-      {inventoryError && <p>{inventoryError}</p>}
-      {stock.map((stockItem) => (
-        <div key={stockItem.id}>
-          <label>
-            {stockItem.name}：
-            <input
-              type="number"
-              value={stockItem.weight}
-              onChange={(e) => {
-                const weight = Number(e.target.value);
-
-                setOriginalStock((current) => {
-                  if (current[stockItem.id] === undefined) {
-                    return {
-                      ...current,
-                      [stockItem.id]: stockItem.weight,
-                    };
-                  }
-
-                  return current;
-                });
-
-                setStock((currentStock) =>
-                  currentStock.map((item) =>
-                    item.id === stockItem.id ? { ...item, weight } : item,
-                  ),
-                );
-              }}
+        <Route
+          path="/inventory"
+          element={
+            <InventoryPage
+              stock={stock}
+              inventoryError={inventoryError}
+              stockMessage={stockMessage}
+              handleStockUpdate={handleStockUpdate}
+              setStock={setStock}
+              setOriginalStock={setOriginalStock}
             />
-            g
-          </label>
-
-          <button onClick={() => handleStockUpdate(stockItem)}>更新</button>
-          {stockMessage[stockItem.id] && <p>{stockMessage[stockItem.id]}</p>}
-        </div>
-      ))}
-    </>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
