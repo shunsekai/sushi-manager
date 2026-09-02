@@ -283,45 +283,46 @@ export default function App() {
   };
   return (
     <BrowserRouter>
-      <header>
+      <header className="site-header">
         <h1>Sushi Manager</h1>
-
         <nav>
           <Link to="/">ホーム</Link>
           <Link to="/inventory">在庫管理</Link>
         </nav>
       </header>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <HomePage
-              menus={menus}
-              sales={sales}
-              safetyMargin={safetyMargin}
-              preparedMenus={preparedMenus}
-              preparationMessage={preparationMessage}
-              handleSalesChange={handleSalesChange}
-              setSafetyMargin={setSafetyMargin}
-              handlePreparation={handlePreparation}
-            />
-          }
-        />
+      <main className="main-content">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <HomePage
+                menus={menus}
+                sales={sales}
+                safetyMargin={safetyMargin}
+                preparedMenus={preparedMenus}
+                preparationMessage={preparationMessage}
+                handleSalesChange={handleSalesChange}
+                setSafetyMargin={setSafetyMargin}
+                handlePreparation={handlePreparation}
+              />
+            }
+          />
 
-        <Route
-          path="/inventory"
-          element={
-            <InventoryPage
-              stock={stock}
-              inventoryError={inventoryError}
-              stockMessage={stockMessage}
-              handleStockUpdate={handleStockUpdate}
-              setStock={setStock}
-              setOriginalStock={setOriginalStock}
-            />
-          }
-        />
-      </Routes>
+          <Route
+            path="/inventory"
+            element={
+              <InventoryPage
+                stock={stock}
+                inventoryError={inventoryError}
+                stockMessage={stockMessage}
+                handleStockUpdate={handleStockUpdate}
+                setStock={setStock}
+                setOriginalStock={setOriginalStock}
+              />
+            }
+          />
+        </Routes>
+      </main>
     </BrowserRouter>
   );
 }

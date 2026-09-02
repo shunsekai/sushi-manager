@@ -1,0 +1,40 @@
+.section {
+  margin-bottom: 40px;
+}
+
+.preparationList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.card h3 {
+  margin: 0 0 12px;
+}
+
+.button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.preparationTitle {
+  margin-top: 32px;
+}
+
+.card p {
+  margin: 8px 0;
+}
+
+.input {
+  width: 100px;
+  margin: 0 8px;
+  padding: 6px 8px;
+  text-align: center;
+}

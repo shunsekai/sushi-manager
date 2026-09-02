@@ -1,4 +1,5 @@
 import type { Menu } from "../App";
+import styles from "./SalesSection.module.css";
 
 type SalesSectionProps = {
   menus: Menu[];
@@ -12,24 +13,26 @@ export default function SalesSection({
   handleSalesChange,
 }: SalesSectionProps) {
   return (
-    <section>
+    <section className={styles.section}>
       <h2>今日の売上</h2>
-
-      {menus.map((item) => (
-        <div key={item.id}>
-          <label>
-            {item.name}：
-            <input
-              type="number"
-              value={sales[item.id] ?? 0}
-              onChange={(e) =>
-                handleSalesChange(item.id, Number(e.target.value))
-              }
-            />
-            皿
-          </label>
-        </div>
-      ))}
+      <div className={styles.salesList}>
+        {menus.map((item) => (
+          <div className={styles.salesItem} key={item.id}>
+            <label>
+              {item.name}：
+              <input
+                className={styles.input}
+                type="number"
+                value={sales[item.id] ?? 0}
+                onChange={(e) =>
+                  handleSalesChange(item.id, Number(e.target.value))
+                }
+              />
+              皿
+            </label>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

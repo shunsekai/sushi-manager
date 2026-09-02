@@ -1,4 +1,5 @@
 import type { Stock } from "../App";
+import styles from "./InventorySection.module.css";
 
 type InventorySectionProps = {
   stock: Stock[];
@@ -21,46 +22,57 @@ const InventorySection = ({
 }: InventorySectionProps) => {
   return (
     <>
-      <h2>在庫</h2>
+      <section className={styles.section}>
+        <h2>在庫</h2>
 
-      {inventoryError && <p>{inventoryError}</p>}
+        {inventoryError && <p>{inventoryError}</p>}
+        <div className={styles.stockList}>
+          {stock.map((stockItem) => (
+            <div className={styles.stockItem} key={stockItem.id}>
+              <label>
+                {stockItem.name}：
+                <input
+                  className={styles.input}
+                  type="number"
+                  value={stockItem.weight}
+                  onChange={(e) => {
+                    const weight = Number(e.target.value);
 
-      {stock.map((stockItem) => (
-        <div key={stockItem.id}>
-          <label>
-            {stockItem.name}：
-            <input
-              type="number"
-              value={stockItem.weight}
-              onChange={(e) => {
-                const weight = Number(e.target.value);
+                    setOriginalStock((current) => {
+                      if (current[stockItem.id] === undefined) {
+                        return {
+                          ...current,
+                          [stockItem.id]: stockItem.weight,
+                        };
+                      }
 
-                setOriginalStock((current) => {
-                  if (current[stockItem.id] === undefined) {
-                    return {
-                      ...current,
-                      [stockItem.id]: stockItem.weight,
-                    };
-                  }
+                      return current;
+                    });
 
-                  return current;
-                });
+                    setStock((currentStock) =>
+                      currentStock.map((item) =>
+                        item.id === stockItem.id ? { ...item, weight } : item,
+                      ),
+                    );
+                  }}
+                />
+                g
+              </label>
 
-                setStock((currentStock) =>
-                  currentStock.map((item) =>
-                    item.id === stockItem.id ? { ...item, weight } : item,
-                  ),
-                );
-              }}
-            />
-            g
-          </label>
+              <button
+                className={styles.button}
+                onClick={() => handleStockUpdate(stockItem)}
+              >
+                更新
+              </button>
 
-          <button onClick={() => handleStockUpdate(stockItem)}>更新</button>
-
-          {stockMessage[stockItem.id] && <p>{stockMessage[stockItem.id]}</p>}
+              {stockMessage[stockItem.id] && (
+                <p>{stockMessage[stockItem.id]}</p>
+              )}
+            </div>
+          ))}
         </div>
-      ))}
+      </section>
     </>
   );
 };

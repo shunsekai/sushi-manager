@@ -1,0 +1,25 @@
+.section {
+  margin-bottom: 40px;
+}
+
+.section h2 {
+  margin: 0 0 20px;
+}
+.salesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.input {
+  width: 100px;
+  margin: 0 8px;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.salesItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
