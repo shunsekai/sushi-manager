@@ -63,7 +63,7 @@ export default function App() {
         console.error(error);
         return;
       }
-      console.log(data);
+      
       const menusWithIngredients = data.map((menu) => ({
         id: menu.id,
         name: menu.name ?? "",
