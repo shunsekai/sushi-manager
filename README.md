@@ -9,6 +9,7 @@
 
 - React
 - TypeScript
+- vite
 - Supabase
 - React Router
 - CSS Modules
@@ -71,6 +72,21 @@
 コンポーネントごとのスタイルをCSS Modulesで管理し、スタイルの影響範囲を分離しています。
 
 共通のリセットやページ全体のレイアウトは`App.css`、各機能固有のスタイルは各コンポーネントのCSS Moduleに分けています。
+
+## 起動方法
+
+```bash
+npm install
+npm run dev
+```
+
+ターミナルに表示されたURLにアクセスしてください
+
+## ビルド
+
+```bash
+npm run build
+```
 
 ## 画面
 
