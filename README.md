@@ -1,50 +1,91 @@
-# React + TypeScript + Vite
+# Sushi Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+寿司店の売上・在庫・仕込みを管理するWEBアプリです。
 
-Currently, two official plugins are available:
+売上数と安全余裕率から必要な仕込み数を計算し、材料ごとの必要量を確認できます。
+また、材料の在庫量を管理し、仕込み時には在庫不足も確認します。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+##　使用技術
 
-## Expanding the ESLint configuration
+- React
+- TypeScript
+- Supabase
+- React Router
+- CSS Modules
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## 機能
 
-- Configure the top-level `parserOptions` property like this:
+### 売上管理
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- メニューごとの当日の売上数を入力
+- 入力した売上数をもとに仕込み数を計算
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### 安全余裕
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+- 安全余裕率を設定
+- 売上数に安全余裕を加えた仕込み数を自動計算
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+### 仕込み管理
+
+- メニューごとの必要な仕込み数を表示
+- 仕込み数から材料ごとの必要量を計算
+- 仕込み時に材料の在庫量を確認
+- 在庫が不足している場合はエラーメッセージを表示
+- 仕込み完了後は在庫量を更新
+
+### 在庫管理
+
+- 材料ごとの現在の在庫量を表示
+- 在庫量を変更して更新
+- 在庫更新に失敗した場合は元の値に戻す
+- 更新結果をメッセージで表示
+
+## 工夫した点
+
+### コンポーネント分割
+
+画面の役割ごとにコンポーネントを分割しています。
+
+- `HomePage`
+- `InventoryPage`
+- `SalesSection`
+- `PreparationSection`
+- `InventorySection`
+
+ページと各機能を分離することで、1つのコンポーネントに処理やUIが集中しすぎない構成にしました。
+
+### Supabaseとのデータ連携
+
+メニュー、材料、在庫などのデータをSupabaseから取得し、Reactの状態として管理しています。
+
+在庫更新や仕込み処理では、Supabaseのデータを更新した後に画面側の状態も更新するようにしています。
+
+### エラー処理
+
+在庫不足や在庫更新の失敗などを想定し、ユーザーに処理結果が分かるようメッセージを表示しています。
+
+在庫更新に失敗した場合は、変更前の値を保持してブラウザ上の表示も元に戻すようにしています。
+
+### CSS Modules
+
+コンポーネントごとのスタイルをCSS Modulesで管理し、スタイルの影響範囲を分離しています。
+
+共通のリセットやページ全体のレイアウトは`App.css`、各機能固有のスタイルは各コンポーネントのCSS Moduleに分けています。
+
+## 画面
+
+### ホーム
+
+売上入力、安全余裕率の設定、仕込み数・必要材料量の確認ができます。
+
+### 在庫管理
+
+材料ごとの在庫量を確認・更新できます。
+
+## 今後の改善
+
+- SupabaseのRLSによるアクセス制御
+- 認証機能
+- 在庫履歴の管理
+- 売上データの保存・集計
+- UI・レスポンシブデザインのさらなる改善
