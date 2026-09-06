@@ -3,6 +3,7 @@ import { supabase } from "./lib/supabase.ts";
 import "./App.css";
 import HomePage from "./pages/HomePage";
 import InventoryPage from "./pages/InventoryPage";
+import NotFoundPage from "./pages/NotFoundPage.tsx";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 
 export type Ingredient = {
@@ -151,7 +152,7 @@ export default function App() {
       }));
       return;
     }
-    // ① 全材料の在庫をチェック
+    
     for (const ingredient of item.ingredients) {
       const stockItem = stock.find(
         (stockItem) => stockItem.ingredient_id === ingredient.id,
@@ -176,7 +177,7 @@ export default function App() {
       }
     }
 
-    // ② 全材料が足りていたらDBを更新
+    
     for (const ingredient of item.ingredients) {
       const stockItem = stock.find(
         (stockItem) => stockItem.ingredient_id === ingredient.id,
@@ -209,7 +210,7 @@ export default function App() {
       }
     }
 
-    // ③ ブラウザ側の在庫も更新
+   
     setStock((currentStock) =>
       currentStock.map((stockItem) => {
         const ingredient = item.ingredients.find(
@@ -229,7 +230,7 @@ export default function App() {
       }),
     );
 
-    // ④ 成功メッセージ
+    
     setPreparationMessage((current) => ({
       ...current,
       [item.id]: "仕込みが完了しました",
@@ -321,6 +322,9 @@ export default function App() {
               />
             }
           />
+
+           <Route path="*" element={<NotFoundPage />} />
+
         </Routes>
       </main>
     </BrowserRouter>
